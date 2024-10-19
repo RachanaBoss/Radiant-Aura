@@ -23,10 +23,10 @@ function validate_image($file){
 		if(is_file(base_app.$file)){
 			return base_url.$file.$ts;
 		}else{
-			return base_url.'dist/img/logo1.png';
+			return base_url.'dist/img/no-image-available.png';
 		}
 	}else{
-		return base_url.'dist/img/logo1.png';
+		return base_url.'dist/img/no-image-available.png';
 	}
 }
 function format_num($number = '' , $decimal = ''){

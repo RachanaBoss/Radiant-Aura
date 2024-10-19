@@ -108,7 +108,7 @@ $brands = isset($_GET['b']) ? json_decode(urldecode($_GET['b'])) : array();
                         <a class="card product-item text-reset text-decoration-none" href=".?p=view_product&id=<?php echo md5($row['id']) ?>">
                             <!-- Product image-->
                             <div class="overflow-hidden shadow product-holder">
-                            <img class="card-img-top w-100 product-cover" src="<?php echo validate_image(file: $img) ?>" alt="..." />
+                            <img class="card-img-top w-100 product-cover" src="<?php echo validate_image($img) ?>" alt="..." />
                             </div>
                             <!-- Product details-->
                             <div class="card-body p-4">
