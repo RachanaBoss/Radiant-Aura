@@ -1,10 +1,13 @@
-<script src="https://www.paypalobjects.com/api/checkout.js"></script>
 <?php 
 $total = 0;
-    $qry = $conn->query("SELECT c.*,p.name,i.price,p.id as pid from `cart` c inner join `inventory` i on i.id=c.inventory_id inner join products p on p.id = i.product_id where c.client_id = ".$_settings->userdata('id'));
-    while($row= $qry->fetch_assoc()):
-        $total += $row['price'] * $row['quantity'];
-    endwhile;
+$qry = $conn->query("SELECT c.*, p.name, i.price, p.id AS pid FROM `cart` c 
+                      INNER JOIN `inventory` i ON i.id = c.inventory_id 
+                      INNER JOIN products p ON p.id = i.product_id 
+                      WHERE c.client_id = " . $_settings->userdata('id'));
+
+while ($row = $qry->fetch_assoc()):
+    $total += $row['price'] * $row['quantity'];
+endwhile;
 ?>
 <section class="py-5">
     <div class="container">
@@ -27,10 +30,13 @@ $total = 0;
                         </div>
                         <hr>
                         <div class="col my-3">
-                        <h4 class="text-muted">Payment Method</h4>
+                            <h4 class="text-muted">Payment Method</h4>
                             <div class="d-flex w-100 justify-content-between">
-                                <button class="btn btn-flat btn-dark">Cash on Delivery</button>
-                                <span id="paypal-button"></span>
+                                <button type="button" class="btn btn-flat btn-dark" id="cod-button">Cash on Delivery</button>
+                                <button type="button" class="btn btn-flat" id="khalti-button">  <img src="uploads/payment/khalti.png" alt="Khalti" style="height: 50px;"/>
+                                </button>
+                                <button type="button" class="btn btn-flat" id="esewa-button">  <img src="uploads/payment/esewa.png" alt="Khalti" style="height: 50px;"/>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -39,88 +45,92 @@ $total = 0;
         </div>
     </div>
 </section>
+
 <script>
-paypal.Button.render({
-    env: 'sandbox', // change for production if app is live,
- 
-        //app's client id's
-	client: {
-        sandbox:    'ARi2rJK5gQ-4catdPxRnfLOVQRMiCvq-qXMmlbItbjxWZfyq5u51mqE7Ppka7OG_0Bq5l_TIQkm45sUV',
-        //production: 'AaBHKJFEej4V6yaArjzSx9cuf-UYesQYKqynQVCdBlKuZKawDDzFyuQdidPOBSGEhWaNQnnvfzuFB9SM'
-    },
- 
-    commit: true, // Show a 'Pay Now' button
- 
-    style: {
-    	color: 'blue',
-    	size: 'small'
-    },
- 
-    payment: function(data, actions) {
-        return actions.payment.create({
-            payment: {
-                transactions: [
-                    {
-                    	//total purchase
-                        amount: { 
-                        	total: '<?php echo $total; ?>', 
-                        	currency: 'PHP' 
-                        }
-                    }
-                ]
+$(function() {
+    // Cash on Delivery button
+    $('#cod-button').click(function() {
+        $('[name="payment_method"]').val("Cash on Delivery");
+        $('[name="paid"]').val(0);
+        $('#place_order').submit();
+    });
+
+    // Khalti payment button
+    $('#khalti-button').click(function() {
+        var amount = '<?php echo $total; ?>';
+        var config = {
+            // Khalti configuration
+            "publicKey": "test_public_key_XXXXXXXXXXXX",
+            "amount": amount * 100, // Amount in paisa
+            "transactionId": new Date().getTime(),
+            "productIdentity": "product_id",
+            "productName": "Order Payment",
+            "mobile": "Your Mobile Number",
+            "productUrl": "http://www.example.com",
+            "eventHandler": {
+                onSuccess: function (payload) {
+                    // Handle successful payment here
+                    payment_online(payload);
+                },
+                onError: function (error) {
+                    console.error(error);
+                    alert("Payment failed. Please try again.");
+                },
+                onClose: function () {
+                    alert("Khalti payment dialog closed.");
+                }
             }
-        });
-    },
- 
-    onAuthorize: function(data, actions) {
-        return actions.payment.execute().then(function(payment) {
-    		// //sweetalert for successful transaction
-    		// swal('Thank you!', 'Paypal purchase successful.', 'success');
-            payment_online()
-        });
-    },
- 
-}, '#paypal-button');
-function payment_online(){
-    $('[name="payment_method"]').val("Online Payment")
-    $('[name="paid"]').val(1)
-    $('#place_order').submit()
-}
-$(function(){
-    $('[name="order_type"]').change(function(){
-        if($(this).val() ==2){
-            $('.address-holder').hide('slow')
-        }else{
-            $('.address-holder').show('slow')
-        }
-    })
-    $('#place_order').submit(function(e){
-        e.preventDefault()
+        };
+        KhaltiCheckout.show(config);
+    });
+
+    // eSewa payment button
+    $('#esewa-button').click(function() {
+        var amount = '<?php echo $total; ?>';
+        // Redirect to eSewa payment gateway
+        window.location.href = "https://esewa.com.np/epayment/main?amt=" + amount + "&scd=YOUR_SCD&pid=ORDER_ID";
+    });
+
+    $('#place_order').submit(function(e) {
+        e.preventDefault();
         start_loader();
         $.ajax({
-            url:'classes/Master.php?f=place_order',
-            method:'POST',
-            data:$(this).serialize(),
-            dataType:"json",
-            error:err=>{
-                console.log(err)
-                alert_toast("An error occured","error")
+            url: 'classes/Master.php?f=place_order',
+            method: 'POST',
+            data: $(this).serialize(),
+            dataType: "json",
+            error: err => {
+                console.log(err);
+                alert_toast("An error occurred", "error");
                 end_loader();
             },
-            success:function(resp){
-                if(!!resp.status && resp.status == 'success'){
+            success: function(resp) {
+                if (!!resp.status && resp.status == 'success') {
                     end_loader();
-                    alert_toast("Order successfully placed","success")
-                    setTimeout(function(){
-                        location.replace('./')
-                    },2000)
-                }else{
-                    console.log(resp)
-                    alert_toast("An error occured","error")
+                    alert_toast("Order successfully placed", "success");
+                    setTimeout(function() {
+                        location.replace('./');
+                    }, 2000);
+                } else {
+                    console.log(resp);
+                    alert_toast("An error occurred", "error");
                     end_loader();
                 }
             }
-        })
-    })
-})
+        });
+    });
+});
+
+// Khalti payment initialization
+var KhaltiCheckout = {
+    show: function(config) {
+        // Khalti checkout code (to be implemented based on Khalti's official documentation)
+    }
+};
+
+function payment_online(paymentData) {
+    $('[name="payment_method"]').val("Online Payment");
+    $('[name="paid"]').val(1);
+    $('#place_order').submit();
+}
 </script>
