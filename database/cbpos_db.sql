@@ -271,7 +271,7 @@ CREATE TABLE `system_info` (
 
 INSERT INTO `system_info` (`id`, `meta_field`, `meta_value`) VALUES
 (1, 'name', 'Cosmetic and Beauty Products Online Shop'),
-(6, 'short_name', 'Beauty'),
+(6, 'short_name', 'Radiant-Aura'),
 (11, 'logo', 'uploads/logo-1645065716.jpg?v=1645065716'),
 (13, 'user_avatar', 'uploads/user_avatar.jpg'),
 (14, 'cover', 'uploads/cover-1645065725.jpg?v=1645065725');

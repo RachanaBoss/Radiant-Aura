@@ -61,7 +61,7 @@
 <!-- Footer-->
 <footer class="py-4 bg-gradient-pink">
             <div class="container">
-              <p class="m-0 text-center text-white">Copyright &copy; By Radiant Aura<br/>All Right Reserve 2024</p>
+              <p class="m-0 text-center text-white">Copyright &copy; By <?=$_settings->info('short_name')?><br/>All Right Reserve 2024</p>
               <!-- <p class="m-0 text-center text-white">Please Subscribe: <a href="https://1sourcecodr.blogspot.com/">1 Source code</a></p> -->
           </div>
         </footer>
