@@ -104,15 +104,19 @@ $(function(){
             dataType:"json",
             error:err=>{
                 console.log(err)
-                alert_toast("an error occured","error")
+                alert_toast("An error occured","error")
                 end_loader();
             },
             success:function(resp){
                 if(!!resp.status && resp.status == 'success'){
-                    location.replace('./')
+                    end_loader();
+                    alert_toast("Order successfully placed","success")
+                    setTimeout(function(){
+                        location.replace('./')
+                    },2000)
                 }else{
                     console.log(resp)
-                    alert_toast("an error occured","error")
+                    alert_toast("An error occured","error")
                     end_loader();
                 }
             }
