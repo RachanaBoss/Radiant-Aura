@@ -473,10 +473,11 @@ Class Master extends DBConnection {
 		extract($_POST);
 		$client_id = $this->settings->userdata('id');
 		
-		$data = " client_id = '{$client_id}' ";
+		$data = "client_id = '{$client_id}' ";
 		if(isset($ref_code))
 		$data .= " ,ref_code = '{$ref_code}' ";
 		$data .= " ,payment_method = '{$payment_method}' ";
+		$data .= " ,order_type = 2";
 		$data .= " ,amount = '{$amount}' ";
 		$data .= " ,paid = '{$paid}' ";
 		$data .= " ,delivery_address = '{$delivery_address}' ";
