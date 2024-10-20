@@ -66,121 +66,128 @@
 </section>
 <script>
     function calc_total(){
-        var total  = 0
+        var total  = 0;
 
         $('.total-amount').each(function(){
-            amount = $(this).text()
-            amount = amount.replace(/\,/g,'')
-            amount = parseFloat(amount)
-            total += amount
-        })
-        $('#grand-total').text(parseFloat(total).toLocaleString('en-US'))
+            var amount = $(this).text();
+            amount = amount.replace(/\,/g, '');
+            amount = parseFloat(amount);
+            total += amount;
+        });
+        $('#grand-total').text(parseFloat(total).toLocaleString('en-US'));
     }
-    function qty_change($type,_this){
-        var qty = _this.closest('.cart-item').find('.cart-qty').val()
-        var price = _this.closest('.cart-item').find('.price').text()
-            price = price.replace(/,/g,'')
-            console.log(price)
-        var cart_id = _this.closest('.cart-item').find('.cart-qty').attr('data-id')
-        var new_total = 0
-        start_loader();
-        if($type == 'minus'){
-            qty = parseInt(qty) - 1
-        }else{
-            qty = parseInt(qty) + 1
+
+    function qty_change($type, _this){
+        var qty = _this.closest('.cart-item').find('.cart-qty').val();
+        var price = _this.closest('.cart-item').find('.price').text();
+        price = price.replace(/,/g, '');
+        var cart_id = _this.closest('.cart-item').find('.cart-qty').attr('data-id');
+        var new_total = 0;
+
+        // Ensure quantity can't go below 1
+        if($type == 'minus' && parseInt(qty) <= 1){
+            alert_toast("Quantity cannot be less than 1", 'warning');
+            return;
         }
-        price = parseFloat(price)
-        // console.log(qty,price)
-        new_total = parseFloat(qty * price).toLocaleString('en-US')
-        _this.closest('.cart-item').find('.cart-qty').val(qty)
-        _this.closest('.cart-item').find('.total-amount').text(new_total)
-        calc_total()
+
+        start_loader();
+        
+        if($type == 'minus'){
+            qty = parseInt(qty) - 1;
+        } else {
+            qty = parseInt(qty) + 1;
+        }
+
+        price = parseFloat(price);
+        new_total = parseFloat(qty * price).toLocaleString('en-US');
+        _this.closest('.cart-item').find('.cart-qty').val(qty);
+        _this.closest('.cart-item').find('.total-amount').text(new_total);
+        calc_total();
 
         $.ajax({
-            url:'classes/Master.php?f=update_cart_qty',
-            method:'POST',
-            data:{id:cart_id, quantity: qty},
-            dataType:'json',
-            error:err=>{
-                console.log(err)
-                alert_toast("an error occured", 'error');
-                end_loader()
+            url: 'classes/Master.php?f=update_cart_qty',
+            method: 'POST',
+            data: {id: cart_id, quantity: qty},
+            dataType: 'json',
+            error: err => {
+                console.log(err);
+                alert_toast("An error occurred", 'error');
+                end_loader();
             },
-            success:function(resp){
-                if(!!resp.status && resp.status == 'success'){
-                    end_loader()
-                }else{
-                    alert_toast("an error occured", 'error');
-                    end_loader()
+            success: function(resp){
+                if(resp.status && resp.status == 'success'){
+                    end_loader();
+                } else {
+                    alert_toast("An error occurred", 'error');
+                    end_loader();
                 }
             }
-
-        })
+        });
     }
+
     function rem_item(id){
-        $('.modal').modal('hide')
-        var _this = $('.rem_item[data-id="'+id+'"]')
-        var id = _this.attr('data-id')
-        var item = _this.closest('.cart-item')
+        $('.modal').modal('hide');
+        var _this = $('.rem_item[data-id="'+id+'"]');
+        var id = _this.attr('data-id');
+        var item = _this.closest('.cart-item');
         start_loader();
         $.ajax({
-            url:'classes/Master.php?f=delete_cart',
-            method:'POST',
-            data:{id:id},
-            dataType:'json',
-            error:err=>{
-                console.log(err)
-                alert_toast("an error occured", 'error');
-                end_loader()
+            url: 'classes/Master.php?f=delete_cart',
+            method: 'POST',
+            data: {id: id},
+            dataType: 'json',
+            error: err => {
+                console.log(err);
+                alert_toast("An error occurred", 'error');
+                end_loader();
             },
-            success:function(resp){
-                if(!!resp.status && resp.status == 'success'){
-                   location.reload()
-                }else{
-                    alert_toast("an error occured", 'error');
-                    end_loader()
+            success: function(resp){
+                if(resp.status && resp.status == 'success'){
+                   location.reload();
+                } else {
+                    alert_toast("An error occurred", 'error');
+                    end_loader();
                 }
             }
-
-        })
+        });
     }
+
     function empty_cart(){
         start_loader();
         $.ajax({
-            url:'classes/Master.php?f=empty_cart',
-            method:'POST',
-            data:{},
-            dataType:'json',
-            error:err=>{
-                console.log(err)
-                alert_toast("an error occured", 'error');
-                end_loader()
+            url: 'classes/Master.php?f=empty_cart',
+            method: 'POST',
+            data: {},
+            dataType: 'json',
+            error: err => {
+                console.log(err);
+                alert_toast("An error occurred", 'error');
+                end_loader();
             },
-            success:function(resp){
-                if(!!resp.status && resp.status == 'success'){
-                   location.reload()
-                }else{
-                    alert_toast("an error occured", 'error');
-                    end_loader()
+            success: function(resp){
+                if(resp.status && resp.status == 'success'){
+                   location.reload();
+                } else {
+                    alert_toast("An error occurred", 'error');
+                    end_loader();
                 }
             }
-
-        })
+        });
     }
+
     $(function(){
-        calc_total()
+        calc_total();
         $('.min-qty').click(function(){
-            qty_change('minus',$(this))
-        })
+            qty_change('minus', $(this));
+        });
         $('.plus-qty').click(function(){
-            qty_change('plus',$(this))
-        })
+            qty_change('plus', $(this));
+        });
         $('#empty_cart').click(function(){
-            // empty_cart()
-            _conf("Are you sure to empty your cart list?",'empty_cart',[])
-        })
+            _conf("Are you sure to empty your cart list?", 'empty_cart', []);
+        });
         $('.rem_item').click(function(){
-            _conf("Are you sure to remove the item in cart list?",'rem_item',[$(this).attr('data-id')])
-        })
-    })
+            _conf("Are you sure to remove the item in the cart list?", 'rem_item', [$(this).attr('data-id')]);
+        });
+    });
 </script>
