@@ -181,11 +181,24 @@ Class Master extends DBConnection {
 			return json_encode($resp);
 			exit;
 		}
+
+
+
 		if(empty($id)){
 			$sql = "INSERT INTO `products` set {$data} ";
 		}else{
 			$sql = "UPDATE `products` set {$data} where id = '{$id}' ";
 		}
+
+
+		// // write $sql data in data.txt file
+		// $myfile = fopen("data.txt", "w") or die("Unable to open file!");
+		// fwrite($myfile, $sql);
+		// fclose($myfile);
+
+
+
+
 		$save = $this->conn->query($sql);
 		if($save){
 			$pid = empty($id) ? $this->conn->insert_id : $id;
