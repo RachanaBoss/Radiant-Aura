@@ -49,68 +49,86 @@ if(isset($_GET['id']) && $_GET['id'] > 0){
 		<a class="btn btn-flat btn-default" href="?page=inventory">Cancel</a>
 	</div>
 </div>
+
+
 <script>
-    function displayImg(input,_this) {
-        console.log(input.files)
-        var fnames = []
-        Object.keys(input.files).map(k=>{
-            fnames.push(input.files[k].name)
-        })
-        _this.siblings('.custom-file-label').html(JSON.stringify(fnames))
-	    
-	}
-	$(document).ready(function(){
-        $('.select2').select2({placeholder:"Please Select here",width:"relative"})
-		$('#inventory-form').submit(function(e){
-			e.preventDefault();
-            var _this = $(this)
-			 $('.err-msg').remove();
-			start_loader();
-			$.ajax({
-				url:_base_url_+"classes/Master.php?f=save_inventory",
-				data: new FormData($(this)[0]),
+    $(document).ready(function(){
+        $('.select2').select2({placeholder:"Please Select here",width:"relative"});
+        
+        $('#inventory-form').submit(function(e){
+            e.preventDefault();
+            var _this = $(this);
+            $('.err-msg').remove();
+            start_loader();
+
+            // Client-side Validation
+            var isValid = true;
+            var quantity = $('input[name="quantity"]').val();
+            var price = $('input[name="price"]').val();
+
+            // Validate Quantity
+            if (quantity <= 0) {
+                isValid = false;
+                $('<div class="alert alert-danger err-msg">Quantity must be a positive number.</div>').insertAfter('input[name="quantity"]');
+            }
+
+            // Validate Price
+            if (price <= 0) {
+                isValid = false;
+                $('<div class="alert alert-danger err-msg">Price must be a positive number.</div>').insertAfter('input[name="price"]');
+            }
+
+            // If validation fails, stop submission
+            if (!isValid) {
+                end_loader();
+                $("html, body").animate({ scrollTop: _this.closest('.card').offset().top }, "fast");
+                return false;
+            }
+
+            $.ajax({
+                url:_base_url_ + "classes/Master.php?f=save_inventory",
+                data: new FormData($(this)[0]),
                 cache: false,
                 contentType: false,
                 processData: false,
                 method: 'POST',
-                type: 'POST',
                 dataType: 'json',
-				error:err=>{
-					console.log(err)
-					alert_toast("An error occured",'error');
-					end_loader();
-				},
-				success:function(resp){
-					if(typeof resp =='object' && resp.status == 'success'){
-						location.href = "./?page=inventory";
-					}else if(resp.status == 'failed' && !!resp.msg){
-                        var el = $('<div>')
-                            el.addClass("alert alert-danger err-msg").text(resp.msg)
-                            _this.prepend(el)
-                            el.show('slow')
-                            $("html, body").animate({ scrollTop: _this.closest('.card').offset().top }, "fast");
-                            end_loader()
-                    }else{
-						alert_toast("An error occured",'error');
-						end_loader();
-                        console.log(resp)
-					}
-				}
-			})
-		})
+                error: err => {
+                    console.log(err);
+                    alert_toast("An error occurred", 'error');
+                    end_loader();
+                },
+                success: function(resp) {
+                    if (typeof resp == 'object' && resp.status == 'success') {
+                        location.href = "./?page=inventory";
+                    } else if (resp.status == 'failed' && !!resp.msg) {
+                        var el = $('<div>');
+                        el.addClass("alert alert-danger err-msg").text(resp.msg);
+                        _this.prepend(el);
+                        el.show('slow');
+                        $("html, body").animate({ scrollTop: _this.closest('.card').offset().top }, "fast");
+                        end_loader();
+                    } else {
+                        alert_toast("An error occurred", 'error');
+                        end_loader();
+                        console.log(resp);
+                    }
+                }
+            });
+        });
 
         $('.summernote').summernote({
-		        height: 200,
-		        toolbar: [
-		            [ 'style', [ 'style' ] ],
-		            [ 'font', [ 'bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear'] ],
-		            [ 'fontname', [ 'fontname' ] ],
-		            [ 'fontsize', [ 'fontsize' ] ],
-		            [ 'color', [ 'color' ] ],
-		            [ 'para', [ 'ol', 'ul', 'paragraph', 'height' ] ],
-		            [ 'table', [ 'table' ] ],
-		            [ 'view', [ 'undo', 'redo', 'fullscreen', 'codeview', 'help' ] ]
-		        ]
-		    })
-	})
+            height: 200,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
+                ['fontname', ['fontname']],
+                ['fontsize', ['fontsize']],
+                ['color', ['color']],
+                ['para', ['ol', 'ul', 'paragraph', 'height']],
+                ['table', ['table']],
+                ['view', ['undo', 'redo', 'fullscreen', 'codeview', 'help']]
+            ]
+        });
+    });
 </script>
